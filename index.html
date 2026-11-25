@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechCompare India — Laptop & Mobile Store Comparison Hub</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              900: '#312e81',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbar for comparison matrix and horizontal pills */
+    ::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    .card-hover {
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col">
+
+  <!-- Top Toast / Message Banner (Replaces alert()) -->
+  <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full px-4 sm:px-0"></div>
+
+  <!-- Header & Hero Search Section -->
+  <header class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white border-b border-slate-800 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+      <!-- Top Bar -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 shadow-inner">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-white">TechCompare India</h1>
+              <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">26 Stores Live</span>
+            </div>
+            <p class="text-xs sm:text-sm text-slate-300">Compare prices, EMI perks, delivery speed & buyback value across India's top stores</p>
+          </div>
+        </div>
+
+        <!-- View Mode & Quick Stats -->
+        <div class="flex items-center gap-2 self-start sm:self-auto">
+          <button id="btn-open-compare-modal" onclick="scrollToComparison()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-semibold shadow-sm transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M3 12h18M3 18h18"/>
+            </svg>
+            <span>Compare Selected (<span id="header-compare-count">3</span>/4)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Unified Product Search Box -->
+      <div class="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-4 sm:p-5 shadow-xl">
+        <label for="product-search-input" class="block text-xs font-semibold uppercase tracking-wider text-indigo-200 mb-2">
+          1. Enter Laptop or Smartphone Model to Generate Direct Store Search Links
+        </label>
+        <div class="flex flex-col sm:flex-row gap-3">
+          <div class="relative flex-1">
+            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+            </div>
+            <input
+              type="text"
+              id="product-search-input"
+              placeholder="e.g., MacBook Air M5, Samsung Galaxy A27 5G, HP Victus 15, iPhone 17 Pro..."
+              class="w-full pl-11 pr-20 py-3 rounded-xl bg-white text-slate-900 placeholder-slate-400 text-sm sm:text-base font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-inner"
+            />
+            <button
+              id="clear-search-btn"
+              onclick="clearSearchQuery()"
+              class="hidden absolute inset-y-0 right-2.5 my-auto h-7 px-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold transition"
+            >
+              Clear
+            </button>
+          </div>
+          <button
+            onclick="openTop4SearchTabs()"
+            title="Opens search results in Amazon, Flipkart, Croma & Reliance Digital"
+            class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition shadow-md shrink-0"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+            </svg>
+            <span>Compare in Top 4 Stores</span>
+          </button>
+        </div>
+
+        <!-- Quick Preset Chips -->
+        <div class="mt-3.5 flex flex-wrap items-center gap-2">
+          <span class="text-xs font-medium text-slate-300 mr-1">Popular searches:</span>
+          <button onclick="applyPreset('MacBook Air M5', 'laptop')" class="preset-chip px-3 py-1 rounded-full text-xs font-medium bg-white/10 hover:bg-white/20 text-white border border-white/15 transition">MacBook Air M5</button>
+          <button onclick="applyPreset('HP Victus 15 RTX 4050', 'laptop')" class="preset-chip px-3 py-1 rounded-full text-xs font-medium bg-white/10 hover:bg-white/20 text-white border border-white/15 transition">HP Victus 15</button>
+          <button onclick="applyPreset('Samsung Galaxy A27 5G', 'mobile')" class="preset-chip px-3 py-1 rounded-full text-xs font-medium bg-white/10 hover:bg-white/20 text-white border border-white/15 transition">Samsung Galaxy A27 5G</button>
+          <button onclick="applyPreset('Motorola Edge 70 Fusion', 'mobile')" class="preset-chip px-3 py-1 rounded-full text-xs font-medium bg-white/10 hover:bg-white/20 text-white border border-white/15 transition">Motorola Edge 70 Fusion</button>
+          <button onclick="applyPreset('Xiaomi 14 Civi 5G', 'mobile')" class="preset-chip px-3 py-1 rounded-full text-xs font-medium bg-white/10 hover:bg-white/20 text-white border border-white/15 transition">Xiaomi 14 Civi 5G</button>
+          <button onclick="applyPreset('Lenovo ThinkPad', 'laptop')" class="preset-chip px-3 py-1 rounded-full text-xs font-medium bg-white/10 hover:bg-white/20 text-white border border-white/15 transition">Lenovo ThinkPad</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8">
+
+    <!-- Side-by-Side Store Comparison Matrix Section -->
+    <section id="comparison-section" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="p-4 sm:p-6 border-b border-slate-200 bg-slate-50/70 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
+            <h2 class="text-lg sm:text-xl font-bold text-slate-900">Side-by-Side Store Comparison Matrix</h2>
+          </div>
+          <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+            Select up to <strong class="text-slate-700">4 stores</strong> from the directory below using the <span class="font-semibold text-indigo-600">Compare</span> checkbox to inspect them side-by-side.
+          </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="presetCompareGroup(['amazon', 'flipkart', 'croma', 'reliancedigital'])" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 transition">
+            Preset: Top Retailers
+          </button>
+          <button onclick="presetCompareGroup(['cashify', 'amazonrenewed', 'controlz', 'budli'])" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 transition">
+            Preset: Refurbished & Sell
+          </button>
+          <button onclick="clearComparedStores()" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-700 transition">
+            Clear All
+          </button>
+        </div>
+      </div>
+
+      <!-- Comparison Matrix Table Wrapper -->
+      <div id="comparison-matrix-wrapper" class="overflow-x-auto">
+        <!-- Populated dynamically via JS -->
+      </div>
+    </section>
+
+    <!-- Directory Controls: Category Tabs, Device Toggle, Search Store Filter & View Switcher -->
+    <section class="space-y-4">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <!-- Category Filter Pills -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0" id="category-tabs">
+          <button data-category="all" onclick="setCategoryFilter('all')" class="cat-tab active px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap bg-indigo-600 text-white shadow-sm transition">
+            All Stores (26)
+          </button>
+          <button data-category="marketplace" onclick="setCategoryFilter('marketplace')" class="cat-tab px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+            Marketplaces (4)
+          </button>
+          <button data-category="omnichannel" onclick="setCategoryFilter('omnichannel')" class="cat-tab px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+            Omnichannel Chains (5)
+          </button>
+          <button data-category="official" onclick="setCategoryFilter('official')" class="cat-tab px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+            Official Brand Stores (11)
+          </button>
+          <button data-category="refurbished" onclick="setCategoryFilter('refurbished')" class="cat-tab px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+            Refurbished & Sell Old (6)
+          </button>
+        </div>
+
+        <!-- Right Controls: Device Type Toggle & View Mode -->
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- Device Toggle -->
+          <div class="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200" role="group">
+            <button data-device="all" onclick="setDeviceFilter('all')" class="dev-tab px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-900 shadow-sm transition">
+              Both
+            </button>
+            <button data-device="laptop" onclick="setDeviceFilter('laptop')" class="dev-tab px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition">
+              💻 Laptops
+            </button>
+            <button data-device="mobile" onclick="setDeviceFilter('mobile')" class="dev-tab px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition">
+              📱 Mobiles
+            </button>
+          </div>
+
+          <!-- View Toggle: Cards vs Full Table -->
+          <div class="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200">
+            <button id="view-cards-btn" onclick="setViewMode('cards')" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-indigo-600 shadow-sm transition">
+              Grid Cards
+            </button>
+            <button id="view-table-btn" onclick="setViewMode('table')" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition">
+              Full Table
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Query Status Bar -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1">
+        <p id="results-summary-text" class="text-sm text-slate-600 font-medium">
+          Showing <strong class="text-slate-900">26</strong> verified Indian stores
+        </p>
+        <div id="active-query-badge" class="hidden inline-flex items-center gap-2 text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-xl">
+          <span>Live Search Links Ready for:</span>
+          <span id="active-query-label" class="underline font-bold"></span>
+        </div>
+      </div>
+
+      <!-- Store Directory Grid View -->
+      <div id="stores-grid-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Cards dynamically rendered here -->
+      </div>
+
+      <!-- Store Directory Full Table View -->
+      <div id="stores-table-container" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-100/80 border-b border-slate-200 text-xs font-bold uppercase tracking-wider text-slate-600">
+                <th class="py-3.5 px-4">Compare</th>
+                <th class="py-3.5 px-4">Store Name</th>
+                <th class="py-3.5 px-4">Category</th>
+                <th class="py-3.5 px-4">Devices</th>
+                <th class="py-3.5 px-4">Delivery & Pickup</th>
+                <th class="py-3.5 px-4">EMI & Offers</th>
+                <th class="py-3.5 px-4">Trade-In / Buyback</th>
+                <th class="py-3.5 px-4 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="stores-table-body" class="divide-y divide-slate-200 text-sm">
+              <!-- Rows dynamically rendered here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Floating Bottom Compare Dock (Visible when stores are selected) -->
+  <div id="floating-compare-bar" class="sticky bottom-3 z-40 max-w-4xl mx-auto w-full px-4 transition-all duration-300">
+    <div class="bg-slate-900/95 backdrop-blur-md text-white border border-slate-700 rounded-2xl px-4 py-3 shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5 flex-wrap">
+        <span class="text-xs font-bold uppercase tracking-wider text-indigo-300">Compare Tray:</span>
+        <div id="floating-selected-pills" class="flex flex-wrap gap-1.5">
+          <!-- Selected store badges -->
+        </div>
+      </div>
+      <div class="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end">
+        <button onclick="scrollToComparison()" class="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow">
+          View Matrix
+        </button>
+        <button onclick="openAllComparedStoreLinks()" class="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold transition shadow">
+          Search All Selected ↗
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 mt-12 py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+      <p><strong>TechCompare India</strong> — Unified directory & comparison tool for all 26 Indian laptop and smartphone stores.</p>
+      <p>Search links open official store pages directly in a new tab for live Indian Rupee (₹) pricing.</p>
+    </div>
+  </footer>
+
+  <!-- JavaScript Logic -->
+  <script>
+    /**
+     * Complete dataset of all 26 Indian websites across 4 categories:
+     * 1. Marketplaces (4)
+     * 2. Omnichannel Electronics Chains (5)
+     * 3. Official Brand Stores (11)
+     * 4. Refurbished & Second-Hand Platforms (6)
+     */
+    const STORES = [
+      // --- 1. MAJOR ONLINE MARKETPLACES ---
+      {
+        id: 'amazon',
+        name: 'Amazon India',
+        domain: 'amazon.in',
+        category: 'marketplace',
+        categoryLabel: 'Online Marketplace',
+        devices: ['laptop', 'mobile'],
+        devicesLabel: 'Laptops & Mobiles',
+        baseUrl: 'https://www.amazon.in',
+        buildSearchUrl: (q) => `https://www.amazon.in/s?k=${encodeURIComponent(q)}`,
+        delivery: 'Same-day / 1-day Prime delivery across metro cities',
+        emiAndOffers: 'No-Cost EMI, SBI/ICICI/HDFC instant bank discounts, Great Indian Festival deals',
+        tradeIn: 'Yes — Instant doorstep exchange discount on old phones & laptops',
+        keyAdvantage: 'Massive catalog, verified reviews, fast Prime shipping & hassle-free returns',
+        accentColor: 'bg-amber-500'
+      },
+      {
+        id: 'flipkart',
+        name: 'Flipkart',
+        domain: 'flipkart.com',
+        category: 'marketplace',
+        categoryLabel: 'Online Marketplace',
+        devices: ['laptop', 'mobile'],
+        devicesLabel: 'Laptops & Mobiles',
+        baseUrl: 'https://www.flipkart.com',
+        buildSearchUrl: (q) => `https://www.flipkart.com/search?q=${encodeURIComponent(q)}`,
+        delivery: '1–2 day Flipkart Plus delivery & Open-Box Delivery verification',
+        emiAndOffers: 'Flipkart Axis Card 5% cashback, SuperCoins, Big Billion Days sales',
+        tradeIn: 'Yes — Doorstep smartphone & laptop exchange at checkout',
+        keyAdvantage: 'Exclusive India smartphone launches & Open-Box inspection before OTP',
+        accentColor: 'bg-blue-600'
+      },
+      {
+        id: 'jiomart',
+        name: 'JioMart',
+        domain: 'jiomart.com',
+        category: 'marketplace',
+        categoryLabel: 'Online Marketplace',
+        devices: ['laptop', 'mobile'],
+        devicesLabel: 'Laptops & Mobiles',
+        baseUrl: 'https://www.jiomart.com',
+        buildSearchUrl: (q) => `https://www.jiomart.com/search/${encodeURIComponent(q)}`,
+        delivery: 'Fast delivery powered by local Reliance Retail fulfillment hubs',
+        emiAndOffers: 'Competitive everyday pricing, RelianceOne loyalty points & bank cashbacks',
+        tradeIn: 'Limited — Select smartphone exchange offers',
+        keyAdvantage: 'Backed by Reliance Retail supply chain with strong tier-2/tier-3 town reach',
+        accentColor: 'bg-sky-600'
+      },
+      {
+        id: 'tatacliq',
+        name: 'Tata CLiQ',
+        domain: 'tatacliq.com',
+        category: 'marketplace',
+        categoryLabel: 'Online Marketplace',
+        devices: ['laptop', 'mobile'],
+        devicesLabel: 'Laptops & Mobiles',
+        baseUrl: 'https://www.tatacliq.com',
+        buildSearchUrl: (q) => `https://www.tatacliq.com/search/?searchCategory=all&text=${encodeURIComponent(q)}`,
+        delivery: 'Standard courier delivery + Click & Collect at Tata/Croma outlets',
+        emiAndOffers: 'Tata NeuCoins rewards, HDFC/ICICI bank instant discounts, No-Cost EMI',
+        tradeIn: 'Yes — Select mobile exchange program',
+        keyAdvantage: '100% brand-authorized sellers backed by Tata Group trust',
+        accentColor: 'bg-rose-600'
+      },
+
+      // --- 2. OMNICHANNEL ELECTRONICS CHAINS ---
+      {
+        id: 'croma',
+        name: 'Croma',
+        domain: 'croma.com',
+        category: 'omnichannel',
+        categoryLabel: 'Omnichannel Chain',
+        devices: ['laptop', 'mobile'],
+        devicesLabel: 'Laptops & Mobiles',
+        baseUrl: 'https://www.croma.com',
+        buildSearchUrl: (q) => `https://www.croma.com/searchB?q=${encodeURIComponent(q)}%3Arelevance`,
+        delivery: '3-hour Zip Express delivery in major cities + In-store pickup',
+        emiAndOffers: 'Tata NeuCoins, ZipCare extended warranty plans, 10% bank cashbacks',
+        tradeIn: 'Yes — Both online doorstep exchange & in-store instant evaluation',
+        keyAdvantage: 'Test devices physically at 500+ stores across India before or after ordering',
+        accentColor: 'bg-teal-600'
+      },
+      {
+        id: 'reliancedigital',
+        name: 'Reliance Digital',
+        domain: 'reliancedigital.in',
+        category: 'omnichannel',
+        categoryLabel: 'Omnichannel Chain',
+        devices: ['laptop', 'mobile'],
+        devicesLabel: 'Laptops & Mobiles',
+        baseUrl: 'https://www.reliancedigital.in',
+        buildSearchUrl: (q) => `https://www.reliancedigital.in/search?q=${encodeURIComponent(q)}:relevance`,
+        delivery: 'Same-day store dispatch in metros + Store pickup across India',
+        emiAndOffers: 'Paperless consumer durable loans (Bajaj/IDFC), No-Cost EMI, bank cashbacks',
+        tradeIn: 'Yes — In-store & online exchange bonuses',
+        keyAdvantage: '200+ brands & dedicated resQ after-sales service centers nationwide',
+        accentColor: 'bg-red-600'
+      },
+      {
+        id: 'vijaysales',
+        name: 'Vijay Sales',
+        domain: 'vijaysales.com',
+        category: 'omnichannel',
+        categoryLabel: 'Omnichannel Chain',
+        devices: ['laptop', 'mobile'],
+        devicesLabel: 'Laptops & Mobiles',
+        baseUrl: 'https://www.vijaysales.com',
+        buildSearchUrl: (q) => `https://www.vijaysales.com/search/${encodeURIComponent(q)}`,
+        delivery: 'Fast local delivery from nearest retail showroom + Store pickup',
+        emiAndOffers: 'MyVS loyalty points, strong Apple & gaming laptop discounts, bank cashbacks',
+        tradeIn: 'Yes — Instant exchange bonus on smartphones & laptops',
+        keyAdvantage: 'Aggressive offline-matched pricing on flagship phones & gaming laptops',
+        accentColor: 'bg-orange-600'
+      },
+      {
+        id: 'poorvika',
+        name: 'Poorvika',
+        domain: 'poorvikamobile.com',
+        category: 'omnichannel',
+        categoryLabel: 'Omnichannel Chain',
+        devices: ['laptop', 'mobile'],
+        devicesLabel: 'Mobiles & Laptops',
+        baseUrl: 'https://www.poorvikamobile.com',
+        buildSearchUrl: (q) => `https://www.poorvikamobile.com/search?q=${encodeURIComponent(q)}`,
+        delivery: '2-hour express local delivery in Chennai, Bengaluru & South India',
+        emiAndOffers: 'Zero down-payment EMI, instant cashback on credit/debit cards, freebies',
+        tradeIn: 'Yes — Instant old mobile buyback & upgrade bonus',
+        keyAdvantage: 'Dominant South Indian retail network with ultra-fast 2-hour city delivery',
+        accentColor: 'bg-orange-500'
+      },
+      {
+        id: 'sangeetha',
+        name: 'Sangeetha Mobiles',
+        domain: 'sangeethamobiles.com',
+        category: 'omnichannel',
+        categoryLabel: 'Omnichannel Chain',
+        devices: ['laptop', 'mobile'],
+        devicesLabel: 'Mobiles & Laptops',
+        baseUrl: 'https://www.sangeethamobiles.com',
+        buildSearchUrl: (q) => `https://www.sangeethamobiles.com/search?q=${encodeURIComponent(q)}`,
+        delivery: 'Same-day local store delivery & pickup across South India',
+        emiAndOffers: 'Price-drop protection, screen damage protection & easy zero-down EMI',
+        tradeIn: 'Yes — Instant old smartphone exchange in-store & online',
+        keyAdvantage: 'Unique 30-day price protection & complimentary screen damage assurance',
+        accentColor: 'bg-purple-600'
+      },
+
+      // --- 3. OFFICIAL BRAND STORES ---
+      {
+        id: 'apple',
+        name: 'Apple India Store',
+        domain: 'apple.com/in',
+        category: 'official',
+        categoryLabel: 'Official Brand Store',
+        devices: ['laptop', 'mobile'],
+        devicesLabel: 'MacBooks & iPhones',
+        baseUrl: 'https://www.apple.com/in',
+        buildSearchUrl: (q) => `https://www.apple.com/in/search/${encodeURIComponent(q)}`,
+        delivery: 'Free doorstep delivery across India + Pickup at Apple BKC & Apple Saket',
+        emiAndOffers: 'Apple Education Store student discounts, free AirPods promos, HDFC/Amex EMI',
+        tradeIn: 'Yes — Apple Trade In credit directly toward new iPhone or Mac',
+        keyAdvantage: 'Custom CTO (Configure-to-Order) RAM/SSD upgrades & free AirPods engraving',
+        accentColor: 'bg-slate-800'
+      },
+      {
+        id: 'dell',
+        name: 'Dell India',
+        domain: 'dell.com/en-in',
+        category: 'official',
+        categoryLabel: 'Official Brand Store',
+        devices: ['laptop'],
+        devicesLabel: 'Laptops Only',
+        baseUrl: 'https://www.dell.com/en-in',
+        buildSearchUrl: (q) => `https://www.dell.com/en-in/search/${encodeURIComponent(q)}`,
+        delivery: 'Direct courier delivery across India (3–7 business days)',
+        emiAndOffers: 'Student & corporate employee discounts, Dell Rewards, No-Cost EMI',
+        tradeIn: 'Yes — Dell PC Trade-In & recycling program',
+        keyAdvantage: 'Direct access to XPS, Latitude, Alienware & customizable ProSupport warranties',
+        accentColor: 'bg-sky-700'
+      },
+      {
+        id: 'hp',
+        name: 'HP India Store',
+        domain: 'hp.com/in-en',
+        category: 'official',
+        categoryLabel: 'Official Brand Store',
+        devices: ['laptop'],
+        devicesLabel: 'Laptops Only',
+        baseUrl: 'https://www.hp.com/in-en/shop',
+        buildSearchUrl: (q) => `https://www.hp.com/in-en/shop/catalogsearch/result/?q=${encodeURIComponent(q)}`,
+        delivery: 'Free doorstep delivery across 15,000+ Indian pin codes',
+        emiAndOffers: 'HP Student Store pricing, cashback offers, bundled HyperX/HP accessories',
+        tradeIn: 'Yes — HP Laptop Exchange bonus program',
+        keyAdvantage: 'Full range of Pavilion, Envy, Spectre, Omen & Victus with official Care Packs',
+        accentColor: 'bg-cyan-700'
+      },
+      {
+        id: 'lenovo',
+        name: 'Lenovo India',
+        domain: 'lenovo.com/in/en',
+        category: 'official',
+        categoryLabel: 'Official Brand Store',
+        devices: ['laptop'],
+        devicesLabel: 'Laptops Only',
+        baseUrl: 'https://www.lenovo.com/in/en',
+        buildSearchUrl: (q) => `https://www.lenovo.com/in/en/search?fq=&text=${encodeURIComponent(q)}`,
+        delivery: 'Standard delivery (Custom-built CTO laptops ship in 2–3 weeks)',
+        emiAndOffers: 'UNiDAYS Student Discount, MyLenovo Rewards, 10% Credit Card cashback',
+        tradeIn: 'Yes — Cashify-powered laptop exchange bonus',
+        keyAdvantage: 'Build-Your-Own ThinkPad, Legion & LOQ laptops with exact CPU/GPU/display specs',
+        accentColor: 'bg-red-700'
+      },
+      {
+        id: 'asus',
+        name: 'ASUS India eShop',
+        domain: 'asus.com/in',
+        category: 'official',
+        categoryLabel: 'Official Brand Store',
+        devices: ['laptop', 'mobile'],
+        devicesLabel: 'Laptops & ROG Phones',
+        baseUrl: 'https://www.asus.com/in/store',
+        buildSearchUrl: (q) => `https://www.asus.com/in/searchresult?searchType=products&searchKey=${encodeURIComponent(q)}`,
+        delivery: 'Direct doorstep delivery across India',
+        emiAndOffers: 'ASUS Promo bundle deals (₹99 warranty extensions, ROG gear), No-Cost EMI',
+        tradeIn: 'Yes — Old laptop exchange program',
+        keyAdvantage: 'Complete lineup of Zenbook, Vivobook, TUF Gaming & ROG laptops/phones',
+        accentColor: 'bg-indigo-700'
+      },
+      {
+        id: 'samsung',
+        name: 'Samsung India Shop',
+        domain: 'samsung.com/in',
+        category: 'official',
+        categoryLabel: 'Official Brand Store',
+        devices: ['laptop', 'mobile'],
+        devicesLabel: 'Mobiles & Galaxy Books',
+        baseUrl: 'https://www.samsung.com/in',
+        buildSearchUrl: (q) => `https://www.samsung.com/in/search/?searchvalue=${encodeURIComponent(q)}`,
+        delivery: 'Fast metro delivery + Samsung Experience Store pickup',
+        emiAndOffers: 'Samsung Student+ & Corporate+ discounts, Galaxy Club, bank cashbacks',
+        tradeIn: 'Yes — High upgrade bonus on old smartphones & laptops',
+        keyAdvantage: 'Online-exclusive Galaxy colors, free storage upgrades & Samsung Care+',
+        accentColor: 'bg-blue-800'
+      },
+      {
+        id: 'oneplus',
+        name: 'OnePlus India',
+        domain: 'oneplus.in',
+        category: 'official',
+        categoryLabel: 'Official Brand Store',
+        devices: ['mobile'],
+        devicesLabel: 'Mobiles & Tablets',
+        baseUrl: 'https://www.oneplus.in',
+        buildSearchUrl: (q) => `https://www.oneplus.in/search?keyword=${encodeURIComponent(q)}`,
+        delivery: 'Fast courier shipping + Pickup at OnePlus Experience Stores',
+        emiAndOffers: 'Red Cable Club perks, student discounts, instant ICICI/OneCard bank offers',
+        tradeIn: 'Yes — OnePlus Exchange Program with extra bonus value',
+        keyAdvantage: 'Red Cable Club warranty extensions, free cases/buds bundles & special editions',
+        accentColor: 'bg-rose-700'
+      },
+      {
+        id: 'xiaomi',
+        name: 'Xiaomi / Mi Store',
+        domain: 'mi.com/in',
+        category: 'official',
+        categoryLabel: 'Official Brand Store',
+        devices: ['laptop', 'mobile'],
+        devicesLabel: 'Mobiles & Xiaomi Laptops',
+        baseUrl: 'https://www.mi.com/in',
+        buildSearchUrl: (q) => `https://www.mi.com/in/search/${encodeURIComponent(q)}`,
+        delivery: 'Standard delivery across India + Mi Home store pickup',
+        emiAndOffers: 'Mi Tokens, Reward Mi coupons, bank discounts & No-Cost EMI',
+        tradeIn: 'Yes — Mi Exchange instant phone trade-in',
+        keyAdvantage: 'Official bundles across Xiaomi, Redmi smartphones, tablets & notebooks',
+        accentColor: 'bg-orange-600'
+      },
+      {
+        id: 'motorola',
+        name: 'Motorola India',
+        domain: 'motorola.in',
+        category: 'official',
+        categoryLabel: 'Official Brand Store',
+        devices: ['mobile'],
+        devicesLabel: 'Mobiles Only',
+        baseUrl: 'https://www.motorola.in',
+        buildSearchUrl: (q) => `https://www.motorola.in/search?q=${encodeURIComponent(q)}`,
+        delivery: 'Direct courier delivery across India',
+        emiAndOffers: 'Launch bank discounts, No-Cost EMI & Jio cashback benefits',
+        tradeIn: 'Yes — Doorstep smartphone exchange',
+        keyAdvantage: 'All Pantone-curated Edge, Razr & Moto G color variants in one place',
+        accentColor: 'bg-indigo-800'
+      },
+      {
+        id: 'vivo',
+        name: 'Vivo India e-Store',
+        domain: 'vivo.com/in',
+        category: 'official',
+        categoryLabel: 'Official Brand Store',
+        devices: ['mobile'],
+        devicesLabel: 'Mobiles Only',
+        baseUrl: 'https://www.vivo.com/in',
+        buildSearchUrl: (q) => `https://www.vivo.com/in/search?searchKey=${encodeURIComponent(q)}`,
+        delivery: 'Free express courier delivery across India',
+        emiAndOffers: 'V-Shield protection discounts, instant bank cashbacks & No-Cost EMI',
+        tradeIn: 'Yes — Vivo Upgrade program with bonus exchange value',
+        keyAdvantage: 'Official ZEISS flagship X-series & V-series bundles with V-Shield care',
+        accentColor: 'bg-blue-600'
+      },
+      {
+        id: 'realme',
+        name: 'Realme India Store',
+        domain: 'realme.com/in',
+        category: 'official',
+        categoryLabel: 'Official Brand Store',
+        devices: ['laptop', 'mobile'],
+        devicesLabel: 'Mobiles & Realme Books',
+        baseUrl: 'https://www.realme.com/in',
+        buildSearchUrl: (q) => `https://www.realme.com/in/search?q=${encodeURIComponent(q)}`,
+        delivery: 'Direct courier delivery across India',
+        emiAndOffers: 'Realme Coins, app-exclusive flash coupons & bank instant discounts',
+        tradeIn: 'Yes — Cashify-integrated mobile exchange',
+        keyAdvantage: 'Flash sale pricing, Realme Coins discounts & early-bird accessory combos',
+        accentColor: 'bg-yellow-500'
+      },
+
+      // --- 4. REFURBISHED & SECOND-HAND PLATFORMS ---
+      {
+        id: 'cashify',
+        name: 'Cashify',
+        domain: 'cashify.in',
+        category: 'refurbished',
+        categoryLabel: 'Refurbished & Buyback',
+        devices: ['laptop', 'mobile'],
+        devicesLabel: 'Refurbished & Sell Old',
+        baseUrl: 'https://www.cashify.in',
+        buildSearchUrl: (q) => `https://www.cashify.in/buy-refurbished-mobile-phones/search?q=${encodeURIComponent(q)}`,
+        delivery: 'Free doorstep delivery + 200+ Cashify retail kiosks across India',
+        emiAndOffers: 'Up to 50% off new price, No-Cost EMI, UPI discounts & 6-month warranty',
+        tradeIn: 'Best-in-Class — Instant doorstep pickup & cash/UPI payout for old devices',
+        keyAdvantage: 'India’s #1 platform for selling old phones/laptops or buying 32-point checked devices',
+        accentColor: 'bg-emerald-600'
+      },
+      {
+        id: 'amazonrenewed',
+        name: 'Amazon Renewed',
+        domain: 'amazon.in/renewed',
+        category: 'refurbished',
+        categoryLabel: 'Refurbished Store',
+        devices: ['laptop', 'mobile'],
+        devicesLabel: 'Refurbished Laptops & Phones',
+        baseUrl: 'https://www.amazon.in/b?node=14072630031',
+        buildSearchUrl: (q) => `https://www.amazon.in/s?k=${encodeURIComponent(q + ' renewed')}`,
+        delivery: 'Fast Amazon Prime delivery & easy 7-day replacement',
+        emiAndOffers: 'Standard Amazon bank offers, No-Cost EMI & 6-month seller warranty',
+        tradeIn: 'Via standard Amazon exchange program',
+        keyAdvantage: 'Refurbished laptops & smartphones backed by Amazon’s A-to-Z guarantee',
+        accentColor: 'bg-amber-600'
+      },
+      {
+        id: 'controlz',
+        name: 'ControlZ',
+        domain: 'controlz.world',
+        category: 'refurbished',
+        categoryLabel: 'Renewed Smartphones',
+        devices: ['mobile'],
+        devicesLabel: 'Renewed Mobiles Only',
+        baseUrl: 'https://controlz.world',
+        buildSearchUrl: (q) => `https://controlz.world/search?q=${encodeURIComponent(q)}`,
+        delivery: 'Insured pan-India courier delivery',
+        emiAndOffers: '100% battery health guarantee, No-Cost EMI & 12-month warranty',
+        tradeIn: 'No — Focused purely on factory-level renewed smartphones',
+        keyAdvantage: 'Component-level cosmetic & battery renewal (100% battery health on iPhones)',
+        accentColor: 'bg-violet-600'
+      },
+      {
+        id: 'budli',
+        name: 'Budli',
+        domain: 'budli.in',
+        category: 'refurbished',
+        categoryLabel: 'Refurbished & Buyback',
+        devices: ['laptop', 'mobile'],
+        devicesLabel: 'Refurbished & Sell Old',
+        baseUrl: 'https://www.budli.in',
+        buildSearchUrl: (q) => `https://www.budli.in/catalogsearch/result/?q=${encodeURIComponent(q)}`,
+        delivery: 'Pan-India courier shipping & doorstep pickup for trade-ins',
+        emiAndOffers: 'Budget-friendly graded pricing (Like New / Good / Fair) & warranty',
+        tradeIn: 'Yes — Instant quote & doorstep pickup for used laptops & phones',
+        keyAdvantage: 'Wide stock of refurbished MacBooks, business laptops & iPads',
+        accentColor: 'bg-lime-600'
+      },
+      {
+        id: 'dofy',
+        name: 'Dofy',
+        domain: 'dofy.in',
+        category: 'refurbished',
+        categoryLabel: 'Sell Old Devices',
+        devices: ['laptop', 'mobile'],
+        devicesLabel: 'Sell Used Laptops & Mobiles',
+        baseUrl: 'https://www.dofy.in',
+        buildSearchUrl: (q) => `https://www.dofy.in/sell-old-phone`,
+        delivery: 'Free doorstep pickup & instant payment in major Indian cities',
+        emiAndOffers: 'Instant bank transfer / UPI payout at doorstep',
+        tradeIn: 'Yes — Dedicated sell-old-device portal with 60-second price quote',
+        keyAdvantage: 'Quick doorstep evaluation and instant payment for used phones & laptops',
+        accentColor: 'bg-cyan-600'
+      },
+      {
+        id: 'hellofi',
+        name: 'HelloFi',
+        domain: 'hellofi.in',
+        category: 'refurbished',
+        categoryLabel: 'Sell Old Devices',
+        devices: ['laptop', 'mobile'],
+        devicesLabel: 'Sell Used Laptops & Mobiles',
+        baseUrl: 'https://www.hellofi.in',
+        buildSearchUrl: (q) => `https://www.hellofi.in`,
+        delivery: 'Free doorstep pickup across metro & tier-1 cities',
+        emiAndOffers: 'Instant payment upon device verification',
+        tradeIn: 'Yes — Dedicated buyback platform for used phones, laptops & tablets',
+        keyAdvantage: 'Transparent grading and fast doorstep pickup for selling old electronics',
+        accentColor: 'bg-fuchsia-600'
+      }
+    ];
+
+    // Application State
+    let state = {
+      searchQuery: '',
+      categoryFilter: 'all',
+      deviceFilter: 'all',
+      viewMode: 'cards', // 'cards' | 'table'
+      comparedIds: ['amazon', 'flipkart', 'croma', 'cashify'] // Default 4 stores in matrix
+    };
+
+    // DOM References
+    const searchInput = document.getElementById('product-search-input');
+    const clearSearchBtn = document.getElementById('clear-search-btn');
+    const storesGridContainer = document.getElementById('stores-grid-container');
+    const storesTableContainer = document.getElementById('stores-table-container');
+    const storesTableBody = document.getElementById('stores-table-body');
+    const comparisonMatrixWrapper = document.getElementById('comparison-matrix-wrapper');
+    const resultsSummaryText = document.getElementById('results-summary-text');
+    const activeQueryBadge = document.getElementById('active-query-badge');
+    const activeQueryLabel = document.getElementById('active-query-label');
+    const headerCompareCount = document.getElementById('header-compare-count');
+    const floatingCompareBar = document.getElementById('floating-compare-bar');
+    const floatingSelectedPills = document.getElementById('floating-selected-pills');
+
+    // Initialize App
+    document.addEventListener('DOMContentLoaded', () => {
+      searchInput.addEventListener('input', (e) => {
+        state.searchQuery = e.target.value.trim();
+        updateClearButton();
+        renderAll();
+      });
+
+      renderAll();
+    });
+
+    // Helper: Show non-blocking Toast Notification
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const colors = {
+        info: 'bg-slate-900 text-white border-slate-700',
+        warning: 'bg-amber-600 text-white border-amber-500',
+        success: 'bg-emerald-600 text-white border-emerald-500'
+      };
+      toast.className = `pointer-events-auto px-4 py-3 rounded-xl border shadow-lg text-xs sm:text-sm font-medium flex items-center justify-between gap-3 transition-all duration-300 ${colors[type] || colors.info}`;
+      toast.innerHTML = `<span>${message}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-6px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3200);
+    }
+
+    // Update Clear Button visibility
+    function updateClearButton() {
+      if (state.searchQuery.length > 0) {
+        clearSearchBtn.classList.remove('hidden');
+      } else {
+        clearSearchBtn.classList.add('hidden');
+      }
+    }
+
+    // Clear Search Input
+    function clearSearchQuery() {
+      state.searchQuery = '';
+      searchInput.value = '';
+      updateClearButton();
+      renderAll();
+    }
+
+    // Apply Preset Search Chip
+    function applyPreset(query, deviceType) {
+      state.searchQuery = query;
+      searchInput.value = query;
+      updateClearButton();
+      if (deviceType) {
+        setDeviceFilter(deviceType, false);
+      }
+      renderAll();
+      showToast(`Generated live search links for "${query}" across all matching stores!`, 'success');
+    }
+
+    // Category Filter Handler
+    function setCategoryFilter(category) {
+      state.categoryFilter = category;
+      document.querySelectorAll('.cat-tab').forEach(btn => {
+        if (btn.dataset.category === category) {
+          btn.className = 'cat-tab active px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap bg-indigo-600 text-white shadow-sm transition';
+        } else {
+          btn.className = 'cat-tab px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
+        }
+      });
+      renderDirectory();
+    }
+
+    // Device Filter Handler ('all' | 'laptop' | 'mobile')
+    function setDeviceFilter(device, shouldRender = true) {
+      state.deviceFilter = device;
+      document.querySelectorAll('.dev-tab').forEach(btn => {
+        if (btn.dataset.device === device) {
+          btn.className = 'dev-tab px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-900 shadow-sm transition';
+        } else {
+          btn.className = 'dev-tab px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition';
+        }
+      });
+      if (shouldRender) renderDirectory();
+    }
+
+    // View Mode Handler ('cards' | 'table')
+    function setViewMode(mode) {
+      state.viewMode = mode;
+      const cardsBtn = document.getElementById('view-cards-btn');
+      const tableBtn = document.getElementById('view-table-btn');
+
+      if (mode === 'cards') {
+        cardsBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-indigo-600 shadow-sm transition';
+        tableBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition';
+        storesGridContainer.classList.remove('hidden');
+        storesTableContainer.classList.add('hidden');
+      } else {
+        tableBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-indigo-600 shadow-sm transition';
+        cardsBtn.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-slate-900 transition';
+        storesTableContainer.classList.remove('hidden');
+        storesGridContainer.classList.add('hidden');
+      }
+    }
+
+    // Toggle Store in Comparison Matrix (Max 4)
+    function toggleCompareStore(storeId) {
+      const idx = state.comparedIds.indexOf(storeId);
+      if (idx > -1) {
+        state.comparedIds.splice(idx, 1);
+      } else {
+        if (state.comparedIds.length >= 4) {
+          showToast('Maximum 4 stores can be compared side-by-side. Remove one first.', 'warning');
+          renderDirectory(); // Reset checkbox state
+          return;
+        }
+        state.comparedIds.push(storeId);
+      }
+      renderAll();
+    }
+
+    // Preset Compare Groups
+    function presetCompareGroup(ids) {
+      state.comparedIds = [...ids];
+      renderAll();
+      showToast('Updated side-by-side comparison matrix!', 'info');
+    }
+
+    // Clear Compared Stores
+    function clearComparedStores() {
+      state.comparedIds = [];
+      renderAll();
+    }
+
+    // Smooth Scroll to Comparison Matrix
+    function scrollToComparison() {
+      document.getElementById('comparison-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Build Target URL for a store given current search query
+    function getStoreActionUrl(store) {
+      if (!state.searchQuery) return store.baseUrl;
+      return store.buildSearchUrl(state.searchQuery);
+    }
+
+    // Open Top 4 Retailers in Tabs
+    function openTop4SearchTabs() {
+      const topIds = ['amazon', 'flipkart', 'croma', 'reliancedigital'];
+      const queryText = state.searchQuery || 'laptops and smartphones';
+      topIds.forEach(id => {
+        const store = STORES.find(s => s.id === id);
+        if (store) {
+          window.open(getStoreActionUrl(store), '_blank', 'noopener,noreferrer');
+        }
+      });
+      showToast(`Opened ${queryText} across Amazon, Flipkart, Croma & Reliance Digital.`, 'success');
+    }
+
+    // Open All Currently Selected Stores in Comparison Matrix
+    function openAllComparedStoreLinks() {
+      if (state.comparedIds.length === 0) {
+        showToast('Select at least 1 store to open.', 'warning');
+        return;
+      }
+      state.comparedIds.forEach(id => {
+        const store = STORES.find(s => s.id === id);
+        if (store) {
+          window.open(getStoreActionUrl(store), '_blank', 'noopener,noreferrer');
+        }
+      });
+      showToast(`Opened ${state.comparedIds.length} selected stores in new tabs.`, 'success');
+    }
+
+    // Get Filtered Stores
+    function getFilteredStores() {
+      return STORES.filter(store => {
+        const matchCat = state.categoryFilter === 'all' || store.category === state.categoryFilter;
+        const matchDev = state.deviceFilter === 'all' || store.devices.includes(state.deviceFilter);
+        return matchCat && matchDev;
+      });
+    }
+
+    // Category Badge Styling Helper
+    function getCategoryBadgeClasses(category) {
+      switch (category) {
+        case 'marketplace': return 'bg-blue-50 text-blue-700 border-blue-200';
+        case 'omnichannel': return 'bg-teal-50 text-teal-700 border-teal-200';
+        case 'official': return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+        case 'refurbished': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+        default: return 'bg-slate-100 text-slate-700 border-slate-200';
+      }
+    }
+
+    // Render Everything
+    function renderAll() {
+      renderComparisonMatrix();
+      renderDirectory();
+      renderFloatingTray();
+    }
+
+    // Render Side-by-Side Comparison Matrix
+    function renderComparisonMatrix() {
+      headerCompareCount.textContent = state.comparedIds.length;
+
+      if (state.comparedIds.length === 0) {
+        comparisonMatrixWrapper.innerHTML = `
+          <div class="p-8 text-center">
+            <p class="text-sm font-semibold text-slate-700">No stores selected for comparison yet.</p>
+            <p class="text-xs text-slate-500 mt-1">Click the "Compare" toggle on up to 4 store cards below or use one of the quick presets above.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const selectedStores = state.comparedIds
+        .map(id => STORES.find(s => s.id === id))
+        .filter(Boolean);
+
+      const criteriaRows = [
+        { label: 'Store Category', key: 'categoryLabel', isBadge: true },
+        { label: 'Devices Sold', key: 'devicesLabel' },
+        { label: 'Delivery & Pickup', key: 'delivery' },
+        { label: 'EMI & Bank Discounts', key: 'emiAndOffers' },
+        { label: 'Trade-In / Sell Old Device', key: 'tradeIn' },
+        { label: 'Key Advantage', key: 'keyAdvantage', highlight: true }
+      ];
+
+      let html = `
+        <table class="w-full text-left border-collapse min-w-[680px]">
+          <thead>
+            <tr class="border-b border-slate-200 bg-white">
+              <th class="py-4 px-4 w-44 text-xs font-bold uppercase tracking-wider text-slate-400 bg-slate-50/60 align-top">
+                Comparison Criteria
+              </th>
+              ${selectedStores.map(store => {
+                const actionUrl = getStoreActionUrl(store);
+                const btnLabel = state.searchQuery ? `Search "${state.searchQuery}"` : `Visit ${store.domain}`;
+                return `
+                  <th class="py-4 px-4 align-top border-l border-slate-100">
+                    <div class="flex items-start justify-between gap-2">
+                      <div>
+                        <div class="flex items-center gap-2">
+                          <span class="w-2.5 h-2.5 rounded-full ${store.accentColor}"></span>
+                          <span class="text-base font-extrabold text-slate-900">${store.name}</span>
+                        </div>
+                        <span class="text-xs font-medium text-slate-500">${store.domain}</span>
+                      </div>
+                      <button
+                        onclick="toggleCompareStore('${store.id}')"
+                        title="Remove from comparison"
+                        class="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                      </button>
+                    </div>
+                    <a
+                      href="${actionUrl}"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="mt-3 w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition shadow-sm"
+                    >
+                      <span class="truncate max-w-[170px]">${btnLabel}</span>
+                      <span>↗</span>
+                    </a>
+                  </th>
+                `;
+              }).join('')}
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 text-xs sm:text-sm">
+            ${criteriaRows.map(row => `
+              <tr class="${row.highlight ? 'bg-indigo-50/40' : 'hover:bg-slate-50/70'}">
+                <td class="py-3.5 px-4 font-semibold text-slate-700 bg-slate-50/60 align-top">
+                  ${row.label}
+                </td>
+                ${selectedStores.map(store => {
+                  const val = store[row.key];
+                  if (row.isBadge) {
+                    return `
+                      <td class="py-3.5 px-4 border-l border-slate-100 align-top">
+                        <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getCategoryBadgeClasses(store.category)}">
+                          ${val}
+                        </span>
+                      </td>
+                    `;
+                  }
+                  return `
+                    <td class="py-3.5 px-4 border-l border-slate-100 align-top text-slate-700 leading-relaxed ${row.highlight ? 'font-medium text-slate-900' : ''}">
+                      ${val}
+                    </td>
+                  `;
+                }).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+
+      comparisonMatrixWrapper.innerHTML = html;
+    }
+
+    // Render Store Directory (Cards & Full Table)
+    function renderDirectory() {
+      const filtered = getFilteredStores();
+
+      // Update summary & query indicator
+      resultsSummaryText.innerHTML = `Showing <strong class="text-slate-900">${filtered.length}</strong> of ${STORES.length} verified Indian stores`;
+
+      if (state.searchQuery) {
+        activeQueryBadge.classList.remove('hidden');
+        activeQueryLabel.textContent = `"${state.searchQuery}"`;
+      } else {
+        activeQueryBadge.classList.add('hidden');
+      }
+
+      // Render Grid Cards
+      storesGridContainer.innerHTML = filtered.map(store => {
+        const isCompared = state.comparedIds.includes(store.id);
+        const actionUrl = getStoreActionUrl(store);
+        const ctaText = state.searchQuery
+          ? `Check "${state.searchQuery}" on ${store.name}`
+          : `Browse ${store.name}`;
+
+        return `
+          <article class="card-hover bg-white rounded-2xl border ${isCompared ? 'border-indigo-500 ring-2 ring-indigo-500/15' : 'border-slate-200'} p-5 flex flex-col justify-between">
+            <div>
+              <!-- Card Top Header -->
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl ${store.accentColor} text-white font-extrabold text-sm flex items-center justify-center shrink-0 shadow-sm">
+                    ${store.name.substring(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <h3 class="text-base font-bold text-slate-900 leading-tight">${store.name}</h3>
+                    <span class="text-xs text-slate-500 font-medium">${store.domain}</span>
+                  </div>
+                </div>
+
+                <!-- Compare Toggle Checkbox -->
+                <label class="inline-flex items-center gap-1.5 cursor-pointer select-none px-2.5 py-1.5 rounded-xl border ${isCompared ? 'bg-indigo-50 border-indigo-200 text-indigo-700' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'} text-xs font-semibold transition">
+                  <input
+                    type="checkbox"
+                    class="rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                    ${isCompared ? 'checked' : ''}
+                    onchange="toggleCompareStore('${store.id}')"
+                  />
+                  <span>${isCompared ? 'Compared' : 'Compare'}</span>
+                </label>
+              </div>
+
+              <!-- Badges -->
+              <div class="mt-3.5 flex flex-wrap gap-1.5">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getCategoryBadgeClasses(store.category)}">
+                  ${store.categoryLabel}
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                  ${store.devicesLabel}
+                </span>
+              </div>
+
+              <!-- Key Highlights -->
+              <div class="mt-4 space-y-2 text-xs text-slate-600">
+                <div class="flex items-start gap-2">
+                  <span class="text-slate-400 font-bold shrink-0">🚚</span>
+                  <span><strong class="text-slate-800">Delivery:</strong> ${store.delivery}</span>
+                </div>
+                <div class="flex items-start gap-2">
+                  <span class="text-slate-400 font-bold shrink-0">💳</span>
+                  <span><strong class="text-slate-800">Offers:</strong> ${store.emiAndOffers}</span>
+                </div>
+                <div class="flex items-start gap-2">
+                  <span class="text-slate-400 font-bold shrink-0">🔄</span>
+                  <span><strong class="text-slate-800">Exchange:</strong> ${store.tradeIn}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card Footer CTA -->
+            <div class="mt-5 pt-3.5 border-t border-slate-100">
+              <a
+                href="${actionUrl}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl ${state.searchQuery ? 'bg-indigo-600 hover:bg-indigo-700 text-white' : 'bg-slate-900 hover:bg-slate-800 text-white'} text-xs font-semibold transition shadow-sm"
+              >
+                <span class="truncate">${ctaText}</span>
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                </svg>
+              </a>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      // Render Full Table Rows
+      storesTableBody.innerHTML = filtered.map(store => {
+        const isCompared = state.comparedIds.includes(store.id);
+        const actionUrl = getStoreActionUrl(store);
+        const btnText = state.searchQuery ? 'Search Live ↗' : 'Visit Store ↗';
+
+        return `
+          <tr class="${isCompared ? 'bg-indigo-50/40' : 'hover:bg-slate-50'} transition">
+            <td class="py-3.5 px-4">
+              <input
+                type="checkbox"
+                class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                ${isCompared ? 'checked' : ''}
+                onchange="toggleCompareStore('${store.id}')"
+              />
+            </td>
+            <td class="py-3.5 px-4">
+              <div class="font-bold text-slate-900">${store.name}</div>
+              <div class="text-xs text-slate-500">${store.domain}</div>
+            </td>
+            <td class="py-3.5 px-4">
+              <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getCategoryBadgeClasses(store.category)}">
+                ${store.categoryLabel}
+              </span>
+            </td>
+            <td class="py-3.5 px-4 text-xs font-medium text-slate-700">${store.devicesLabel}</td>
+            <td class="py-3.5 px-4 text-xs text-slate-600 max-w-xs">${store.delivery}</td>
+            <td class="py-3.5 px-4 text-xs text-slate-600 max-w-xs">${store.emiAndOffers}</td>
+            <td class="py-3.5 px-4 text-xs text-slate-600 max-w-xs">${store.tradeIn}</td>
+            <td class="py-3.5 px-4 text-right whitespace-nowrap">
+              <a
+                href="${actionUrl}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition"
+              >
+                ${btnText}
+              </a>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Render Floating Bottom Compare Tray
+    function renderFloatingTray() {
+      if (state.comparedIds.length === 0) {
+        floatingCompareBar.classList.add('hidden');
+        return;
+      }
+
+      floatingCompareBar.classList.remove('hidden');
+      floatingSelectedPills.innerHTML = state.comparedIds.map(id => {
+        const store = STORES.find(s => s.id === id);
+        if (!store) return '';
+        return `
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-xs font-medium text-white">
+            <span>${store.name}</span>
+            <button onclick="toggleCompareStore('${store.id}')" class="text-slate-400 hover:text-rose-400 font-bold leading-none">&times;</button>
+          </span>
+        `;
+      }).join('');
+    }
+  </script>
+</body>
+</html>
